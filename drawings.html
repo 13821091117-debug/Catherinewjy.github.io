@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目详情 | 王婧一 Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: #1a1a1a; /* 改为更深的底色，衬托 PDF 亮色 */
+            overflow: hidden; 
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        /* 顶部导航条优化 */
+        .pdf-header {
+            height: 60px;
+            background: #111;
+            display: flex;
+            justify-content: space-between; /* 左右分布 */
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            z-index: 100;
+            position: relative;
+            border-bottom: 1px solid #333;
+        }
+
+        .header-left { display: flex; align-items: center; }
+
+        .back-link {
+            color: #ccc; text-decoration: none; font-size: 13px;
+            padding: 8px 15px; border-radius: 4px;
+            background: #222;
+            transition: 0.3s;
+            display: flex; align-items: center; gap: 8px;
+            border: 1px solid #444;
+        }
+        .back-link:hover { background: #fff; color: #000; border-color: #fff; }
+
+        .project-title {
+            margin-left: 20px; color: #fff; font-size: 15px; 
+            letter-spacing: 1px; font-weight: 300;
+        }
+
+        /* PDF 容器优化 */
+        #pdf-viewer-container {
+            width: 100%;
+            height: calc(100vh - 61px); 
+            background: #333;
+            position: relative;
+        }
+
+        /* 增加一个加载动画，提升用户体验 */
+        .loading-tip {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666; font-size: 14px;
+            z-index: 1;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            position: relative;
+            z-index: 2; /* 盖在加载提示上面 */
+        }
+
+        /* 针对手机端的提示 */
+        @media (max-width: 768px) {
+            .project-title { font-size: 12px; margin-left: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="pdf-header">
+        <div class="header-left">
+            <a href="index.html" class="back-link">
+                <i class="fas fa-chevron-left"></i> 返回主页
+            </a>
+            <div class="project-title" id="pdfTitle">Loading Project...</div>
+        </div>
+        
+        <div style="color: #555; font-size: 11px; letter-spacing: 1px;">PDF READER MODE</div>
+    </header>
+
+    <div id="pdf-viewer-container">
+        <div class="loading-tip">少女祈祷中...Now Loading...</div>
+        <iframe src="" id="pdfFrame"></iframe>
+    </div>
+
+    <script>
+        const projectPDFs = {
+            "0": { title: "作品 01: 珞珈小筑", file: "../../static/drawings/p1.pdf" },
+            "1": { title: "作品 02: Aura Haven", file: "../../static/drawings/p2.pdf" },
+            "2": { title: "作品 03: House+", file: "../../static/drawings/p3.pdf" },
+            "3": { title: "作品 04: 潮间聚落", file: "../../static/drawings/p4.pdf" }
+        };
+
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id') || "0";
+            const data = projectPDFs[id];
+
+            if (data) {
+                document.getElementById('pdfTitle').innerText = data.title;
+                
+                // 参数详解：
+                // #toolbar=1 显示工具栏（方便用户下载/打印）
+                // #view=FitH 自动水平适应窗口宽度
+                // #page=1 从第一页开始
+                const pdfPath = data.file + "#toolbar=1&view=FitH"; 
+                document.getElementById('pdfFrame').src = pdfPath;
+            } else {
+                document.getElementById('pdfTitle').innerText = "未找到相关项目";
+            }
+        };
+    </script>
+</body>
+</html>
