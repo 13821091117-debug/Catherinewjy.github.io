@@ -3,121 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>项目详情 | 王婧一 Portfolio</title>
+    <title>Project Drawings | Catherine Wang</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: #1a1a1a; /* 改为更深的底色，衬托 PDF 亮色 */
-            overflow: hidden; 
-            font-family: 'Inter', -apple-system, sans-serif;
+        :root {
+            --bg-deep: #050505;
+            --accent-color: #ffffff;
+            --text-dim: #888;
         }
 
-        /* 顶部导航条优化 */
-        .pdf-header {
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%;
+            background-color: var(--bg-deep);
+            color: #eee;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* 防止双滚动条 */
+        }
+
+        /* 顶部导航条 */
+        .nav-header {
             height: 60px;
             background: #111;
             display: flex;
-            justify-content: space-between; /* 左右分布 */
             align-items: center;
             padding: 0 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            z-index: 100;
-            position: relative;
-            border-bottom: 1px solid #333;
+            justify-content: space-between;
+            border-bottom: 1px solid #222;
         }
 
-        .header-left { display: flex; align-items: center; }
-
-        .back-link {
-            color: #ccc; text-decoration: none; font-size: 13px;
-            padding: 8px 15px; border-radius: 4px;
-            background: #222;
+        .back-btn {
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             transition: 0.3s;
-            display: flex; align-items: center; gap: 8px;
-            border: 1px solid #444;
         }
-        .back-link:hover { background: #fff; color: #000; border-color: #fff; }
+        .back-btn:hover { opacity: 0.7; }
 
         .project-title {
-            margin-left: 20px; color: #fff; font-size: 15px; 
-            letter-spacing: 1px; font-weight: 300;
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 2px;
         }
 
-        /* PDF 容器优化 */
-        #pdf-viewer-container {
+        /* PDF 容器 */
+        .pdf-viewer-container {
             width: 100%;
-            height: calc(100vh - 61px); 
-            background: #333;
-            position: relative;
-        }
-
-        /* 增加一个加载动画，提升用户体验 */
-        .loading-tip {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: #666; font-size: 14px;
-            z-index: 1;
+            height: calc(100vh - 60px); /* 减去顶部导航高度 */
+            background: #1a1a1a;
         }
 
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            position: relative;
-            z-index: 2; /* 盖在加载提示上面 */
         }
 
-        /* 针对手机端的提示 */
-        @media (max-width: 768px) {
-            .project-title { font-size: 12px; margin-left: 10px; }
+        /* 加载提示 */
+        .loading-overlay {
+            position: absolute;
+            top: 60px; left: 0; width: 100%; height: 100%;
+            background: #050505;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 600px) {
+            .project-title { font-size: 12px; }
         }
     </style>
 </head>
 <body>
 
-    <header class="pdf-header">
-        <div class="header-left">
-            <a href="index.html" class="back-link">
-                <i class="fas fa-chevron-left"></i> 返回主页
-            </a>
-            <div class="project-title" id="pdfTitle">Loading Project...</div>
-        </div>
-        
-        <div style="color: #555; font-size: 11px; letter-spacing: 1px;">PDF READER MODE</div>
-    </header>
+    <div class="nav-header">
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> BACK TO PORTFOLIO
+        </a>
+        <div class="project-title" id="displayTitle">Loading Project...</div>
+        <div style="width: 100px;"></div> </div>
 
-    <div id="pdf-viewer-container">
-        <div class="loading-tip">少女祈祷中...Now Loading...</div>
-        <iframe src="" id="pdfFrame"></iframe>
+    <div class="loading-overlay" id="loader">
+        <div style="text-align: center;">
+            <i class="fas fa-circle-notch fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i>
+            <p style="font-size: 12px; color: #888;">正在加载 PDF 图纸...</p>
+        </div>
+    </div>
+
+    <div class="pdf-viewer-container">
+        <iframe id="pdfFrame" src="" onload="hideLoader()"></iframe>
     </div>
 
     <script>
-        const projectPDFs = {
-            "0": { title: "作品 01: 珞珈小筑", file: "../../static/drawings/p1.pdf" },
-            "1": { title: "作品 02: Aura Haven", file: "../../static/drawings/p2.pdf" },
-            "2": { title: "作品 03: House+", file: "../../static/drawings/p3.pdf" },
-            "3": { title: "作品 04: 潮间聚落", file: "../../static/drawings/p4.pdf" }
-        };
+        // 项目名称映射（与 index.html 保持一致）
+        const projectData = [
+            { name: "作品 01: 珞珈小筑", file: "static/drawings/p1.pdf" },
+            { name: "作品 02: Aura Haven", file: "static/drawings/p2.pdf" },
+            { name: "作品 03: House+", file: "static/drawings/p3.pdf" },
+            { name: "作品 04: 潮间聚落", file: "static/drawings/p4.pdf" }
+        ];
 
-        window.onload = () => {
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('id') || "0";
-            const data = projectPDFs[id];
+        function hideLoader() {
+            document.getElementById('loader').style.display = 'none';
+        }
 
-            if (data) {
-                document.getElementById('pdfTitle').innerText = data.title;
-                
-                // 参数详解：
-                // #toolbar=1 显示工具栏（方便用户下载/打印）
-                // #view=FitH 自动水平适应窗口宽度
-                // #page=1 从第一页开始
-                const pdfPath = data.file + "#toolbar=1&view=FitH"; 
-                document.getElementById('pdfFrame').src = pdfPath;
+        window.onload = function() {
+            // 解析 URL 参数 ?id=X
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = parseInt(urlParams.get('id'));
+
+            const titleEl = document.getElementById('displayTitle');
+            const frameEl = document.getElementById('pdfFrame');
+
+            if (!isNaN(id) && projectData[id]) {
+                // 设置标题
+                titleEl.innerText = projectData[id].name.toUpperCase();
+                // 设置 PDF 路径
+                frameEl.src = projectData[id].file;
             } else {
-                document.getElementById('pdfTitle').innerText = "未找到相关项目";
+                titleEl.innerText = "PROJECT NOT FOUND";
+                document.getElementById('loader').innerHTML = "<p>未找到对应图纸，请返回主页重新尝试。</p>";
             }
+            
+            // 如果 10 秒后还没加载完（可能是路径错或打不开），允许手动关闭 loader
+            setTimeout(hideLoader, 10000);
         };
     </script>
 </body>
